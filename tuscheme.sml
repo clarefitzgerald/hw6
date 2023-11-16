@@ -1695,15 +1695,19 @@ fun typeof (VAR(x), Delta, Gamma) =
 | typeof (LET (e1, e2), Delta, Gamma) = 
   let tau1 = typeof(e1, Delta, Gamma)
     val etypes = map (fn (e:exp) => typeof(e, Delta, Gamma)) xs
+
+    in 
+      typeof(e2, Delta, Gamma)
+      end
 (*LETSTAR & LETREC*)
  | LETSTAR =>
-                let fun processBindings([], Gamma') = Gamma'
-                      | processBindings((name, exp)::bs, Gamma') =
+                let fun processbind([], Gamma') = Gamma'
+                      | processbinding((name, exp)::xs, Gamma') =
                             let val tau = typeof(exp, Delta, Gamma')
                                 val Gamma'' = bind(name, tau, Gamma')
-                            in processBindings(bs, Gamma'')
+                            in processbinding(xs, Gamma'')
                             end
-                    val finalGamma = processBindings(bindings, Gamma)
+                    val finalGamma = processbinding(bindings, Gamma)
                 in typeof(body, Delta, finalGamma)
                 end)
   | typeof (LETRECX(bindings, body), Delta, Gamma) =
