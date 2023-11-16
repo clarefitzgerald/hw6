@@ -1702,9 +1702,9 @@ fun typeof (VAR(x), Delta, Gamma) =
 (*LETSTAR & LETREC*)
  | LETSTAR =>
                 let fun processBindings([], Gamma') = Gamma'
-                      | processBindings((name, exp)::bs, Gamma') =
+                      | processBindings((bindName, exp)::bs, Gamma') =
                             let val tau = typeof(exp, Delta, Gamma')
-                                val Gamma'' = bind(name, tau, Gamma')
+                                val Gamma'' = bind(bindName, tau, Gamma')
                             in processBindings(bs, Gamma'')
                             end
                     val finalGamma = processBindings(bindings, Gamma)
