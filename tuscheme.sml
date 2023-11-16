@@ -1695,6 +1695,29 @@ fun typeof (VAR(x), Delta, Gamma) =
 | typeof (LET (e1, e2), Delta, Gamma) = 
   let tau1 = typeof(e1, Delta, Gamma)
     val etypes = map (fn (e:exp) => typeof(e, Delta, Gamma)) xs
+(*LETSTAR & LETREC*)
+ | LETSTAR =>
+                let fun processBindings([], Gamma') = Gamma'
+                      | processBindings((name, exp)::bs, Gamma') =
+                            let val tau = typeof(exp, Delta, Gamma')
+                                val Gamma'' = bind(name, tau, Gamma')
+                            in processBindings(bs, Gamma'')
+                            end
+                    val finalGamma = processBindings(bindings, Gamma)
+                in typeof(body, Delta, finalGamma)
+                end)
+  | typeof (LETRECX(bindings, body), Delta, Gamma) =
+        let val Gamma' = foldl (fn (((name, ty), _), G) => bind(name, ty, G)) Gamma bindings
+            val _ = List.app (fn ((name, ty), exp) => 
+                      let val tau_exp = typeof(exp, Delta, Gamma')
+                          val _ = if eqType(ty, tau_exp) then () 
+                                  else raise TypeError ("Type mismatch in binding for " ^ name)
+                      in ()
+                      end) bindings
+        in typeof(body, Delta, Gamma')
+        end
+(*-*)
+
 | typeof (Lambda (formals, body), Delta, Gamma) = 
   let val Gamma' = 
     foldl (fn ((x:exp)) => bind(x))
