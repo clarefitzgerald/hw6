@@ -1746,6 +1746,36 @@ fun typdef (EXP e, Delta, Gamma) =
                                       " may not be redefined with type " ^
                                                                  typeString tau)
                end*)
+(*------------*)
+fun typdef (EXP(e), Delta, Gamma) =
+        let val tau = typeof(e, Delta, Gamma)
+        in (Gamma, typeString(tau))
+        end
+    | typdef (VAL(n, e), Delta, Gamma) =
+        let val tau = typeof(e, Delta, Gamma)
+        in (bind(n, tau, Gamma), typeString(tau))
+        end
+    | typdef (VALREC(name, typ, exp), Delta, Gamma) = 
+        let val tau = typeof(exp, Delta, Gamma)
+            val _ = eqType(tau, typ)
+        in (bind(name, tau, Gamma), typeString(tau))
+        end
+    | typdef (DEFINE(name, tau_name, lambdaExp), Delta, Gamma) =
+        let val tau = typeof(LAMBDA(e), Delta, Gamma)
+            val _ = eqType(tau_name, tau)  
+        in (bind(n, tau, Gamma), typeString(tau))
+        end
+  | typdef _ = raise TypeError "Left As Excercise"
+
+(* type declarations for consistency checking *)
+val _ = op eqKind  : kind      * kind      -> bool
+val _ = op eqKinds : kind list * kind list -> bool
+(* type declarations for consistency checking *)
+val _ = op typeof : exp * kind env * tyex env -> tyex
+val _ = op typdef : def * kind env * tyex env -> tyex env * string
+
+
+
 | typdef _ = raise TypeError "Left As Exercise"
 
 
